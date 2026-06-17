@@ -1,0 +1,49 @@
+name: BuildAndPush
+description: Builds the service in a Docker image, pushes the image to ECR, and updates Lambdas to use the new image
+
+inputs:
+  base_dir:
+    description: "The base directory to build"
+    required: true
+    type: string
+  version:
+    description: "The version string of the image being built"
+    required: true
+    type: string
+  tag_as_latest:
+    description: "Whether the image should be tagged as latest"
+    required: false
+    type: boolean
+    default: false
+
+outputs:
+  ecr-registry:
+    value: ${{ steps.aws-ecr-login.outputs.registry }}
+  image-uri:
+    value: ${{ steps.build-push-deploy.outputs.image-uri }}
+  image-tag:
+    value: ${{ steps.build-push-deploy.outputs.image-tag }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Check out latest commit
+      uses: actions/checkout@v4
+
+    - name: Login to Amazon ECR
+      id: aws-ecr-login
+      uses: aws-actions/amazon-ecr-login@v2
+      with:
+        mask-password: true
+
+    - name: Build and Push Docker image
+      id: build-push-deploy
+      shell: bash
+      env:
+        ECR_REGISTRY: ${{ steps.aws-ecr-login.outputs.registry }}
+        COMMIT_TAG: ${{ github.sha }}
+        VERSION_TAG: ${{ inputs.version }}
+        TAG_LATEST: ${{ inputs.tag_as_latest }}
+      run: |
+        cd ${{ inputs.base_dir }} 
+        ../bin/build_push_deploy.sh $ECR_REGISTRY $GITHUB_REPOSITORY >> $GITHUB_OUTPUT

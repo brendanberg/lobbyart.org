@@ -1,0 +1,57 @@
+name: Upload Assets to S3 and Create Cloudfront Invalidation
+
+on:
+  pull_request:
+    branches: [main]
+    types: [closed]
+    paths:
+      - "client/**" # Only run if files inside the 'client' directory have changed.
+
+jobs:
+  was_merged:
+    name: "Only Run When Merged"
+    # This job is cancelled if the pull request was closed rather than merged.
+    # To prevent the rest of this workflow from running, the first job(s) in
+    # the workflow should have a `needs: was_merged` attribute.
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "Pull request merged."
+
+  upload:
+    runs-on: ubuntu-latest
+    environment: "Production"
+    needs: was_merged
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout Latest Revisions
+        uses: actions/checkout@v6
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v6
+        with:
+          role-to-assume: ${{ vars.AWS_IAM_ROLE_GITHUB_ACTIONS_DEPLOY }}
+          role-session-name: "GithubActionsDeploy"
+          aws-region: us-east-2
+
+      - name: Install Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Upload Static Assets
+        env:
+          AWS_S3_BUCKET_NAME: ${{ vars.AWS_S3_BUCKET_NAME }}
+        run: |
+          aws s3 sync client/ s3://$AWS_S3_BUCKET_NAME
+
+      - name: Create CloudFront Invalidation
+        env:
+          AWS_CLOUDFRONT_DISTRIBUTION_ID: ${{ vars.AWS_CLOUDFRONT_DISTRIBUTION_ID }}
+        run: |
+          aws cloudfront create-invalidation --distribution-id $AWS_CLOUDFRONT_DISTRIBUTION_ID --paths "/*"
