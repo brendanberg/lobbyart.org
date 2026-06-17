@@ -27,8 +27,7 @@ jobs:
       version_tag: ${{ steps.version.outputs.version }}
 
     permissions:
-      id-token: write
-      contents: read
+      contents: write
 
     steps:
       - uses: actions/checkout@v4
