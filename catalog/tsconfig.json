@@ -1,0 +1,26 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "incremental": true,
+    "module": "es2022",
+    "moduleResolution": "node", // Newer module resolution won't work with middy
+    "ignoreDeprecations": "6.0", // Ignore error from using node module resolution instead of nodenext
+    "esModuleInterop": true,
+    "target": "es2022", // set to the *lowest* target you support
+    "strict": true,
+    "verbatimModuleSyntax": false,
+    "declaration": true,
+    "sourceMap": true,
+    "resolveJsonModule": true,
+    "declarationMap": true,
+    "paths": {
+      "@*": ["./src/*"]
+    },
+    "types": ["node"]
+  },
+  "include": ["./**/*.ts", "./**/*.json"],
+  "exclude": ["node_modules"],
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
+  }
+}
