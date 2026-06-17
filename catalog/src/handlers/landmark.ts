@@ -4,7 +4,7 @@ import jsonBodyParser from '@middy/http-json-body-parser';
 import httpErrorHandler from '@middy/http-error-handler';
 import validator from '@middy/validator';
 import { transpileSchema } from '@middy/validator/transpile';
-import { GetLandmarkSchema, PostLandmarkSchema, PutLandmarkSchema } from '@schemas/landmark';
+import { GetLandmarkSchema, PostLandmarkSchema, PatchLandmarkSchema } from '@schemas/landmark';
 import { DynamoDB } from '@stores/dynamoDB';
 import { Landmark, LandmarkOpts } from '@models/landmark';
 import { validatorErrorHandler } from '@middlewares/validator';
@@ -55,39 +55,43 @@ export const getLandmark: Handler = middy<APIGatewayProxyEvent, APIGatewayProxyR
         }
     });
 
-const putLandmarkRequestSchema = transpileSchema({
+const patchLandmarkRequestSchema = transpileSchema({
     type: 'object',
     required: ['pathParameters', 'body'],
     properties: {
         pathParameters: GetLandmarkSchema,
-        body: PutLandmarkSchema,
+        body: PatchLandmarkSchema,
     },
 });
 
-export const putLandmark: Handler = middy<APIGatewayProxyEvent, APIGatewayProxyResult>()
+export const patchLandmark: Handler = middy<APIGatewayProxyEvent, APIGatewayProxyResult>()
     .use(jsonBodyParser())
-    .use(validator({ eventSchema: putLandmarkRequestSchema }))
+    .use(validator({ eventSchema: patchLandmarkRequestSchema }))
     .use(validatorErrorHandler())
     .use(httpErrorHandler())
     .handler(async (request: APIGatewayProxyEvent, context: any) => {
         const landmarkId = request.pathParameters?.ID!;
-        const landmarkOpts = request.body as any as LandmarkOpts;
 
-        if (landmarkId != landmarkOpts.ID) {
+        const response = await ddbClient.retrieveLatest(landmarkId);
+        const item = response.Items?.[0];
+
+        if (!item) {
             return {
-                statusCode: 400,
+                statusCode: 404,
                 isBase64Encoded: false,
                 headers: {
                     'Access-Control-Allow-Origin': '*',
                 },
                 body: JSON.stringify({
-                    message: 'the ID specified in the path does not match the ID in the document',
+                    message: 'an item with the specified ID could not be found',
                 }),
             };
         }
 
-        const item = new Landmark(landmarkOpts);
-        const result = await ddbClient.put(item.toDynamoDBDocument());
+        const landmark = new Landmark(item as LandmarkOpts);
+        Object.assign(landmark, request.body, { Version: new Date() });
+
+        const putResult = await ddbClient.put(item.toDynamoDBDocument());
 
         return {
             statusCode: 200,
@@ -95,7 +99,7 @@ export const putLandmark: Handler = middy<APIGatewayProxyEvent, APIGatewayProxyR
             headers: {
                 'Access-Control-Allow-Origin': '*',
             },
-            body: JSON.stringify(item.toJson()),
+            body: JSON.stringify(landmark.toJson()),
         };
     });
 

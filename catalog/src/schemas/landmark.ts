@@ -16,19 +16,13 @@ export const GetLandmarkSchema = {
     },
 };
 
-export const PutLandmarkSchema = {
+export const PatchLandmarkSchema = {
     $schema: 'https://json-schema.org/draft/2020-12/schema',
     $id: 'http://api.lobbyart.org/schemas/putLandmark.json',
     title: 'PutLandmarkSchema',
     description: 'Fields to create a Landmark record',
     type: 'object',
-    required: ['ID', 'Address', 'Artist', 'Title'],
     properties: {
-        ID: {
-            description: 'The ID of the landmark',
-            type: 'string',
-            format: 'uuid',
-        },
         Approved: {
             description: 'Whether the landmark has been approved for inclusion in the public data set',
             type: 'boolean',

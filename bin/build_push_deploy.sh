@@ -7,7 +7,7 @@ AWS_ECR_REPOSITORY_NAME=$2
 # If COMMIT_TAG and VERSION_TAG are not set by the environment, we're probably
 # running on a developer's local machine. Fetch the values from the git CLI.
 : ${COMMIT_TAG:=$(git rev-parse HEAD)}
-: ${VERSION_TAG:=$(git branch --show-current)}
+: ${VERSION_TAG:=__development__$(git branch --show-current)}
 
 # If GITHUB_OUTPUT isn't set, we probably want to redirect to stdout
 : ${GITHUB_OUTPUT:=/dev/stdout}
