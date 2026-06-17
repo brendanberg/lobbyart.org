@@ -75,7 +75,7 @@ jobs:
           aws-region: us-east-2
 
       - name: Build and Deploy Catalog Service
-        uses: ./.github/actions/build_push.yaml
+        uses: ./.github/actions/build_and_push
         with:
           base_dir: catalog
           version: ${{ needs.version.outputs.version_tag }}
