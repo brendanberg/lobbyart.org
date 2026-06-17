@@ -6,7 +6,6 @@ export const GetUploadUrlSchema = {
     title: 'GetUploadUrlSchema',
     description: 'Request schema to get an upload URL',
     type: 'object',
-    // required: ['filename'],
     properties: {
         filename: {
             description: "The resource filename ending in 'jpg', 'jpeg', or 'png'",
