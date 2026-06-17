@@ -9,12 +9,15 @@ AWS_ECR_REPOSITORY_NAME=$2
 : ${COMMIT_TAG:=$(git rev-parse HEAD)}
 : ${VERSION_TAG:=$(git branch --show-current)}
 
+# If GITHUB_OUTPUT isn't set, we probably want to redirect to stdout
+: ${GITHUB_OUTPUT:=/dev/stdout}
+
 # TODO: Short circuit if vars are not populated or if we don't have authorization
 
 docker build \
     --platform linux/arm64 \
-    --build-arg GITHUB_COMMIT_HASH=$() \
-    --build-arg VERSION_NUMBER=$() \
+    --build-arg GITHUB_COMMIT_HASH=$COMMIT_TAG \
+    --build-arg VERSION_NUMBER=$VERSION_TAG \
     --target dist \
     -t $AWS_ECR_REGISTRY_URL/$AWS_ECR_REPOSITORY_NAME:$COMMIT_TAG \
     -t $AWS_ECR_REGISTRY_URL/$AWS_ECR_REPOSITORY_NAME:$VERSION_TAG \
@@ -35,5 +38,5 @@ for FUNCTION_NAME in $(aws lambda list-functions --query "Functions[?PackageType
         --image-uri $AWS_ECR_REGISTRY_URL/$AWS_ECR_REPOSITORY_NAME:$COMMIT_TAG
 done
 
-echo "image-uri=$AWS_ECR_REGISTRY_URL/$AWS_ECR_REPOSITORY_NAME"
-echo "image-tag=$COMMIT_TAG"
+echo "image-uri=$AWS_ECR_REGISTRY_URL/$AWS_ECR_REPOSITORY_NAME" >> $GITHUB_OUTPUT
+echo "image-tag=$COMMIT_TAG" >> $GITHUB_OUTPUT

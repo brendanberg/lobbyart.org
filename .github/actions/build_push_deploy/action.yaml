@@ -46,4 +46,4 @@ runs:
         TAG_LATEST: ${{ inputs.tag_as_latest }}
       run: |
         cd ${{ inputs.base_dir }} 
-        ../bin/build_push_deploy.sh $ECR_REGISTRY $GITHUB_REPOSITORY >> $GITHUB_OUTPUT
+        ../bin/build_push_deploy.sh $ECR_REGISTRY $GITHUB_REPOSITORY
