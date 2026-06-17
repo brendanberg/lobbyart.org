@@ -19,7 +19,7 @@ Each location should include in its properties dictionary "Location", "Artist", 
 ```
 {
   "type": "Feature",
-  "geometry": {"type": "Point", "coordinates": [<LNG>, <LAT>]},
+  "geometry": {"type": "Point", "coordinates": [<LAT>, <LNG>]},
   "properties": {
     "Location": "<BUILDING-NAME> (<BUILDING-ADDRESS>)",
     "Artist": "<ARTIST-NAME>",
