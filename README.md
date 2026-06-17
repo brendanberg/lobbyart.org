@@ -6,8 +6,6 @@ This online museum catalogs some of the highlights of corporate art collections 
 
 [View the interactive map.](https://lobbyart.org/)
 
-[View a snapshot of the data.](https://github.com/brendanberg/lobbyart.org/blob/main/data/art.geojson)
-
 ## Contributing
 
 While I try to document everything I can, there's no way one person can find every single work of art worth documenting in Manhattan.
