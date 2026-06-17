@@ -45,8 +45,8 @@ export const PutLandmarkSchema = {
             description: "The landmark's latitude and longitude",
             type: 'array',
             prefixItems: [
-                { type: 'number', description: 'Latitude', minimum: -180, maximum: 180 },
-                { type: 'number', description: 'Longitude', minimum: -90, maximum: 90 },
+                { type: 'number', description: 'Latitude', minimum: -90, maximum: 90 },
+                { type: 'number', description: 'Longitude', minimum: -180, maximum: 180 },
             ],
             minItems: 2,
             maxItems: 2,
