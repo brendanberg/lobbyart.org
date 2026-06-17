@@ -28,7 +28,7 @@ runs:
   using: "composite"
   steps:
     - name: Check out latest commit
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Login to Amazon ECR
       id: aws-ecr-login
