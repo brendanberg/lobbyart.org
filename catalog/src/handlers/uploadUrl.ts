@@ -6,11 +6,15 @@ import { GetUploadUrlSchema } from '@schemas/uploadUrl';
 import middy from '@middy/core';
 import httpErrorHandler from '@middy/http-error-handler';
 import validator from '@middy/validator';
+import httpCors from '@middy/http-cors';
 import { transpileSchema } from '@middy/validator/transpile';
 import { validatorErrorHandler } from '@middlewares/validator';
+import httpHeaderNormalizer from '@middy/http-header-normalizer';
 
 const S3_BUCKET_ASSET_UPLOADS = process.env['S3_BUCKET_ASSET_UPLOADS'];
 const client = new S3Client();
+
+const allowedHeaders = ['Accept', 'Authorization', 'Content-Type', 'Origin', 'x-amz-date', 'x-apigateway-header'];
 
 const getUploadUrlRequestSchema = transpileSchema({
     type: 'object',
@@ -20,6 +24,16 @@ const getUploadUrlRequestSchema = transpileSchema({
 });
 
 export const getUploadUrl: Handler = middy<APIGatewayProxyEvent, APIGatewayProxyResult>()
+    .use(httpHeaderNormalizer())
+    .use(
+        httpCors({
+            methods: 'GET',
+            headers: allowedHeaders.join(','),
+            getOrigin: (incomingOrigin, options) => {
+                return incomingOrigin;
+            },
+        }),
+    )
     .use(validator({ eventSchema: getUploadUrlRequestSchema }))
     .use(validatorErrorHandler())
     .use(httpErrorHandler())
@@ -34,9 +48,6 @@ export const getUploadUrl: Handler = middy<APIGatewayProxyEvent, APIGatewayProxy
             // Get signed URL
             statusCode: 200,
             isBase64Encoded: false,
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-            },
             body: JSON.stringify({
                 uploadURL: uploadUrl,
                 distributionURL: `https://${S3_BUCKET_ASSET_UPLOADS}/${filename}`,

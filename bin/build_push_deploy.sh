@@ -32,10 +32,11 @@ fi
 
 for FUNCTION_NAME in $(aws lambda list-functions --query "Functions[?PackageType=='Image'].FunctionName" --output text); do
     aws lambda update-function-code \
-        --output table \
+        --output yaml \
         --no-cli-pager \
         --function-name "$FUNCTION_NAME" \
-        --image-uri $AWS_ECR_REGISTRY_URL/$AWS_ECR_REPOSITORY_NAME:$COMMIT_TAG
+        --image-uri $AWS_ECR_REGISTRY_URL/$AWS_ECR_REPOSITORY_NAME:$COMMIT_TAG \
+        --query "{UpdateFunctionCode: {FunctionName: FunctionName, LastModified: LastModified, CodeSha256: CodeSha256}}"
 done
 
 echo "image-uri=$AWS_ECR_REGISTRY_URL/$AWS_ECR_REPOSITORY_NAME" >> $GITHUB_OUTPUT
