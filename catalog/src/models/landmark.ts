@@ -2,8 +2,8 @@ import { GeoPoint } from '@models/geoPoint';
 import { JsonObject } from './json';
 
 export type LandmarkOpts = {
-    ID?: string;
-    Version?: number;
+    id?: string;
+    ver?: number;
     CreatedTimestamp?: string;
     ApprovedTimestamp?: string;
     Approved?: boolean;
@@ -32,8 +32,8 @@ export class Landmark {
     ImageURL?: string;
 
     constructor({
-        ID = crypto.randomUUID(),
-        Version = Date.now(),
+        id = crypto.randomUUID(),
+        ver = Date.now(),
         CreatedTimestamp = undefined,
         ApprovedTimestamp = undefined,
         Approved = undefined,
@@ -45,8 +45,8 @@ export class Landmark {
         Title,
         ImageURL = undefined,
     }: LandmarkOpts) {
-        this.ID = ID;
-        this.Version = Version;
+        this.ID = id;
+        this.Version = ver;
         this.CreatedTimestamp = CreatedTimestamp ? new Date(CreatedTimestamp) : new Date();
         this.ApprovedTimestamp = ApprovedTimestamp ? new Date(ApprovedTimestamp) : undefined;
         this.Location = Location;
