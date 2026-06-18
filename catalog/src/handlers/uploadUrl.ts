@@ -14,7 +14,6 @@ const client = new S3Client();
 
 const getUploadUrlRequestSchema = transpileSchema({
     type: 'object',
-    required: ['queryStringParameters'],
     properties: {
         queryStringParameters: GetUploadUrlSchema,
     },
