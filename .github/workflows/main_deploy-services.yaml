@@ -56,6 +56,7 @@ jobs:
   #   runs-on: ubuntu-latest
 
   upload:
+    name: "Build, Push, and Deploy"
     runs-on: ubuntu-24.04-arm
     environment: "Production"
     needs:

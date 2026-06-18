@@ -89,7 +89,7 @@ export const patchLandmark: Handler = middy<APIGatewayProxyEvent, APIGatewayProx
         }
 
         const landmark = new Landmark(item as LandmarkOpts);
-        Object.assign(landmark, request.body, { Version: new Date() });
+        Object.assign(landmark, request.body, { Version: Date.now() });
 
         const putResult = await ddbClient.put(landmark.toDynamoDBDocument());
 
