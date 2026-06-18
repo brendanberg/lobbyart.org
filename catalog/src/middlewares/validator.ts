@@ -4,7 +4,7 @@ export const validatorErrorHandler = () => {
     return {
         onError: (request: middy.Request<any, any, any, any, any>) => {
             const error = request.error;
-            delete error.cause.package;
+            delete error?.cause?.package;
 
             if (error.expose && error.statusCode === 400) {
                 request.response = {
