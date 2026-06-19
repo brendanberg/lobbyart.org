@@ -208,31 +208,19 @@ body {
 
 .violet {
 	background: rgb(140, 168, 225);
-	background: linear-gradient(
-		45deg,
-		rgba(140, 168, 225, 1) 0%,
-		rgba(196, 113, 227, 1) 100%
-	);
+	background: linear-gradient(45deg, rgba(140, 168, 225, 1) 0%, rgba(196, 113, 227, 1) 100%);
 	color: #eee;
 }
 
 .blue {
 	background: rgb(84, 173, 203);
-	background: linear-gradient(
-		45deg,
-		rgba(84, 173, 203, 1) 0%,
-		rgba(140, 168, 225, 1) 100%
-	);
+	background: linear-gradient(45deg, rgba(84, 173, 203, 1) 0%, rgba(140, 168, 225, 1) 100%);
 	color: #eee;
 }
 
 .green {
 	background-color: rgb(113, 197, 152);
-	background: linear-gradient(
-		45deg,
-		rgba(113, 197, 152, 1) 0%,
-		rgba(84, 173, 203, 1) 100%
-	);
+	background: linear-gradient(45deg, rgba(113, 197, 152, 1) 0%, rgba(84, 173, 203, 1) 100%);
 	color: #eee;
 }
 
@@ -293,6 +281,11 @@ body {
 	border-bottom: 2pt solid #989bf7;
 }
 
+.legend input[type='text']:disabled {
+	font-weight: 200;
+	color: #bbb;
+}
+
 .legend input[type='submit'] {
 	width: 100%;
 	margin: 5pt 0;
@@ -303,6 +296,12 @@ body {
 	color: #989bf7;
 	background-color: #fff;
 	border: 2pt solid #989bf7;
+}
+
+.legend input[type='submit'].thankyou {
+	color: #60aa58 !important;
+	border: 2pt solid #60aa58 !important;
+	background-color: #ecf8ea !important;
 }
 
 .legend input[type='file'] {
@@ -324,6 +323,10 @@ body {
 	border: 1pt solid #bbb;
 	overflow: hidden;
 	text-overflow: ellipsis;
+}
+
+input:disabled + label.file {
+	color: #bbb;
 }
 
 .legend label.file:focus {
@@ -370,6 +373,12 @@ input:active + label.file {
 
 .legend input[type='submit']:hover {
 	background-color: #e9edff;
+}
+
+.legend input[type='submit'].error {
+	border: 2pt solid #e11e1e;
+	color: #e11e1e;
+	background-color: #ffe9e9;
 }
 
 .legend input[type='submit']:focus {

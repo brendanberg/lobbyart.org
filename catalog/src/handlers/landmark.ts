@@ -2,7 +2,9 @@ import { APIGatewayProxyEvent, APIGatewayProxyResult, Handler } from 'aws-lambda
 import middy from '@middy/core';
 import jsonBodyParser from '@middy/http-json-body-parser';
 import httpErrorHandler from '@middy/http-error-handler';
+import httpHeaderNormalizer from '@middy/http-header-normalizer';
 import validator from '@middy/validator';
+import cors from '@middy/http-cors';
 import { transpileSchema } from '@middy/validator/transpile';
 import { GetLandmarkSchema, PostLandmarkSchema, PatchLandmarkSchema } from '@schemas/landmark';
 import { DynamoDB } from '@stores/dynamoDB';
@@ -11,6 +13,8 @@ import { validatorErrorHandler } from '@middlewares/validator';
 
 const DDB_TABLE_WORKS = process.env['DDB_TABLE_WORKS'];
 const ddbClient = new DynamoDB(DDB_TABLE_WORKS!, 'id', 'ver');
+
+const allowedHeaders = ['Accept', 'Authorization', 'Content-Type', 'Origin', 'x-amz-date', 'x-apigateway-header'];
 
 const getLandmarkRequestSchema = transpileSchema({
     type: 'object',
@@ -21,9 +25,20 @@ const getLandmarkRequestSchema = transpileSchema({
 });
 
 export const getLandmark: Handler = middy<APIGatewayProxyEvent, APIGatewayProxyResult>()
+    .use(httpHeaderNormalizer())
+    .use(cors({ origin: '*', methods: 'GET,PATCH', headers: allowedHeaders.join(',') }))
     .use(validator({ eventSchema: getLandmarkRequestSchema }))
     .use(validatorErrorHandler())
     .use(httpErrorHandler())
+    .use(
+        cors({
+            methods: 'GET,PATCH',
+            headers: allowedHeaders.join(','),
+            getOrigin: (incomingOrigin, options) => {
+                return incomingOrigin;
+            },
+        }),
+    )
     .handler(async (request: APIGatewayProxyEvent, context: any) => {
         const landmarkId = request.pathParameters?.ID!;
 
@@ -34,9 +49,6 @@ export const getLandmark: Handler = middy<APIGatewayProxyEvent, APIGatewayProxyR
             return {
                 statusCode: 404,
                 isBase64Encoded: false,
-                headers: {
-                    'Access-Control-Allow-Origin': '*',
-                },
                 body: JSON.stringify({
                     message: 'an item with the specified ID could not be found',
                 }),
@@ -47,9 +59,6 @@ export const getLandmark: Handler = middy<APIGatewayProxyEvent, APIGatewayProxyR
             return {
                 statusCode: 200,
                 isBase64Encoded: false,
-                headers: {
-                    'Access-Control-Allow-Origin': '*',
-                },
                 body: JSON.stringify(landmark.toJson()),
             };
         }
@@ -65,6 +74,8 @@ const patchLandmarkRequestSchema = transpileSchema({
 });
 
 export const patchLandmark: Handler = middy<APIGatewayProxyEvent, APIGatewayProxyResult>()
+    .use(httpHeaderNormalizer())
+    .use(cors({ origin: '*', methods: 'GET,PATCH', headers: allowedHeaders.join(',') }))
     .use(jsonBodyParser())
     .use(validator({ eventSchema: patchLandmarkRequestSchema }))
     .use(validatorErrorHandler())
@@ -79,9 +90,6 @@ export const patchLandmark: Handler = middy<APIGatewayProxyEvent, APIGatewayProx
             return {
                 statusCode: 404,
                 isBase64Encoded: false,
-                headers: {
-                    'Access-Control-Allow-Origin': '*',
-                },
                 body: JSON.stringify({
                     message: 'an item with the specified ID could not be found',
                 }),
@@ -96,9 +104,6 @@ export const patchLandmark: Handler = middy<APIGatewayProxyEvent, APIGatewayProx
         return {
             statusCode: 200,
             isBase64Encoded: false,
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-            },
             body: JSON.stringify(landmark.toJson()),
         };
     });
@@ -112,6 +117,8 @@ const postLandmarkRequestSchema = transpileSchema({
 });
 
 export const postLandmark: Handler = middy<APIGatewayProxyEvent, APIGatewayProxyResult>()
+    .use(httpHeaderNormalizer())
+    .use(cors({ origin: '*', methods: 'POST', headers: allowedHeaders.join(',') }))
     .use(jsonBodyParser())
     .use(validator({ eventSchema: postLandmarkRequestSchema }))
     .use(validatorErrorHandler())
@@ -125,9 +132,6 @@ export const postLandmark: Handler = middy<APIGatewayProxyEvent, APIGatewayProxy
         return {
             statusCode: 200,
             isBase64Encoded: false,
-            headers: {
-                'Access-Control-Allow-Origin': '*',
-            },
             body: JSON.stringify(item.toJson()),
         };
     });

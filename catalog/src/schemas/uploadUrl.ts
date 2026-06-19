@@ -5,7 +5,7 @@ export const GetUploadUrlSchema = {
     $id: 'http://api.lobbyart.org/schemas/getUploadUrl.json',
     title: 'GetUploadUrlSchema',
     description: 'Request schema to get an upload URL',
-    type: 'object',
+    type: ['object', 'null'],
     properties: {
         filename: {
             description: "The resource filename ending in 'jpg', 'jpeg', or 'png'",
