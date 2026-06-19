@@ -20,6 +20,7 @@ jobs:
           echo "Pull request merged."
 
   upload:
+    name: Upload Assets to S3 and Clear Cloudfront Cache
     runs-on: ubuntu-latest
     environment: "Production"
     needs: was_merged
