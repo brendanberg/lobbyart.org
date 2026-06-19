@@ -1,3 +1,4 @@
-# Current Account ID
+# Current Account ID and Region
 
 data "aws_caller_identity" "current" {}
+data "aws_region" "current" {}
