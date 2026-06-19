@@ -29,6 +29,7 @@
 		<script src='https://api.mapbox.com/mapbox-gl-js/v1.0.0/mapbox-gl.js'></script>
 		<link href='https://api.mapbox.com/mapbox-gl-js/v1.0.0/mapbox-gl.css' rel='stylesheet' />
 		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js" type="application/javascript"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.11.0/axios.min.js" integrity="sha512-h9644v03pHqrIHThkvXhB2PJ8zf5E9IyVnrSfZg8Yj8k4RsO4zldcQc4Bi9iVLUCCsqNY0b4WXVV4UB+wbWENA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 		<script src="https://s3.amazonaws.com/media.lobbyart.org/strudel.min.js" type="application/javascript"></script>
 	</head>
 	<body>
@@ -101,7 +102,7 @@
 					>
 					<input type="file" accept="image/*" id="photo" tabindex="0">
 					<label for="photo" class="file">Photo of Work<p class="placeholder" id="file-name">(no image selected)</p><p class="info" id="file-size"></p></label>
-					<input type="submit" value="Submit" tabindex="0" disabled>
+					<input type="submit" value="Submit" id="submit" tabindex="0" disabled>
 				</form>
 			</div>
 		</div>
