@@ -1,12 +1,11 @@
 
-module "patch-landmark-handler" {
+module "list-works-geojson-handler" {
   source = "git@github.com:starframe-systems/tf-stencils.git//lambda?ref=v0.1.11"
 
-  name     = "patchLandmark"
+  name     = "listWorksGeojson"
   prefix   = replace(var.name, " ", "")
   env_name = "production"
-
-  timeout = 15
+  timeout  = 15
 
   environment_variables = {
     NODE_ENV        = "prod"
@@ -18,12 +17,11 @@ module "patch-landmark-handler" {
   image_tag            = "base"
 
   image_config_overrides = {
-    command = ["index.patchLandmark"]
+    command = ["index.listWorksGeojson"]
   }
 
   execution_role_policy_arns = [
-    module.ddb_table_works.iam_policy_arn["Get"],
-    module.ddb_table_works.iam_policy_arn["BatchWrite"]
+    module.ddb_table_works.iam_policy_arn["Scan"],
   ]
 
   inherited_tags = local.resource_tags
