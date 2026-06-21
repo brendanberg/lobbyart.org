@@ -409,7 +409,7 @@ map.on('load', () => {
 		cluster: true,
 		clusterMaxZoom: 14, // Max zoom to cluster points on
 		clusterRadius: 30, // Radius of each cluster when clustering points (defaults to 50)
-		data: 'https://raw.githubusercontent.com/brendanberg/lobby-art/master/data/art.geojson',
+		data: 'https://api.lobbyart.org/works.geojson',
 	});
 
 	// Load marker images
