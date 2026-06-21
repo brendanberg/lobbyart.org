@@ -38,6 +38,15 @@ export const getLandmark: Handler = middy<APIGatewayProxyEvent, APIGatewayProxyR
     .use(validator({ eventSchema: getLandmarkRequestSchema }))
     .use(validatorErrorHandler())
     .use(httpErrorHandler())
+    .use(
+        cors({
+            methods: 'GET,PATCH',
+            headers: allowedHeaders.join(','),
+            getOrigin: (incomingOrigin, options) => {
+                return incomingOrigin;
+            },
+        }),
+    )
     .handler(async (request: APIGatewayProxyEvent, context: any) => {
         const landmarkId = request.pathParameters?.ID!;
 
