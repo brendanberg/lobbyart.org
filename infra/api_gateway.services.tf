@@ -1,12 +1,14 @@
 
 module "services_gateway" {
-  source = "git@github.com:starframe-systems/tf-stencils.git//api_gateway_v1?ref=v0.1.13"
+  source = "git@github.com:starframe-systems/tf-stencils.git//api_gateway_v1?ref=v0.1.14"
 
   authorized_handler_functions = [
     module.get-upload-url-handler.function_name,
+    module.list-landmark-handler.function_name,
+    module.post-landmark-handler.function_name,
     module.get-landmark-handler.function_name,
     module.patch-landmark-handler.function_name,
-    module.post-landmark-handler.function_name
+    module.list-works-geojson-handler.function_name
   ]
 
   name        = "CatalogService"
@@ -28,10 +30,12 @@ module "services_gateway" {
   }
 
   openapi_specification = templatefile("../catalog/api.yaml", {
-    get_upload_url_handler = module.get-upload-url-handler.function_invoke_arn
-    post_work_handler      = module.post-landmark-handler.function_invoke_arn
-    get_work_handler       = module.get-landmark-handler.function_invoke_arn
-    patch_work_handler     = module.patch-landmark-handler.function_invoke_arn
+    get_upload_url_handler     = module.get-upload-url-handler.function_invoke_arn
+    list_works_handler         = module.list-landmark-handler.function_invoke_arn
+    post_work_handler          = module.post-landmark-handler.function_invoke_arn
+    get_work_handler           = module.get-landmark-handler.function_invoke_arn
+    patch_work_handler         = module.patch-landmark-handler.function_invoke_arn
+    list_works_geojson_handler = module.list-works-geojson-handler.function_invoke_arn
   })
 
   inherited_tags = local.resource_tags

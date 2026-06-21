@@ -10,6 +10,6 @@ module "ddb_table_works" {
 
   attributes = [
     { name = "id", type = "S" },
-    { name = "ver", type = "N" },
+    { name = "ver", type = "S" }
   ]
 }

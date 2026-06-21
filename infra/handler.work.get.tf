@@ -8,6 +8,7 @@ module "get-landmark-handler" {
 
   environment_variables = {
     NODE_ENV        = "prod"
+    NODE_OPTIONS    = "--enable-source-maps"
     DDB_TABLE_WORKS = module.ddb_table_works.table.name
   }
 
@@ -19,7 +20,7 @@ module "get-landmark-handler" {
   }
 
   execution_role_policy_arns = [
-    module.ddb_table_works.iam_policy_arn["Query"],
+    module.ddb_table_works.iam_policy_arn["Get"],
   ]
 
   inherited_tags = local.resource_tags

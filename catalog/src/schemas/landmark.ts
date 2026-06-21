@@ -29,7 +29,7 @@ export const PatchLandmarkSchema = {
         },
         Location: {
             description: "The name of the landmark's location",
-            type: 'string',
+            type: ['string', 'null'],
         },
         Address: {
             description: 'The street address of the landmark',

@@ -8,6 +8,7 @@ module "post-landmark-handler" {
 
   environment_variables = {
     NODE_ENV        = "prod"
+    NODE_OPTIONS    = "--enable-source-maps"
     DDB_TABLE_WORKS = module.ddb_table_works.table.name
   }
 
@@ -19,8 +20,7 @@ module "post-landmark-handler" {
   }
 
   execution_role_policy_arns = [
-    module.ddb_table_works.iam_policy_arn["Put"],
-    module.ddb_table_works.iam_policy_arn["Update"]
+    module.ddb_table_works.iam_policy_arn["BatchWrite"]
   ]
 
   inherited_tags = local.resource_tags

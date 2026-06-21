@@ -26,7 +26,15 @@ const getLandmarkRequestSchema = transpileSchema({
 
 export const getLandmark: Handler = middy<APIGatewayProxyEvent, APIGatewayProxyResult>()
     .use(httpHeaderNormalizer())
-    .use(cors({ origin: '*', methods: 'GET,PATCH', headers: allowedHeaders.join(',') }))
+    .use(
+        cors({
+            methods: 'GET,PATCH',
+            headers: allowedHeaders.join(','),
+            getOrigin: (incomingOrigin, options) => {
+                return incomingOrigin;
+            },
+        }),
+    )
     .use(validator({ eventSchema: getLandmarkRequestSchema }))
     .use(validatorErrorHandler())
     .use(httpErrorHandler())
@@ -42,10 +50,9 @@ export const getLandmark: Handler = middy<APIGatewayProxyEvent, APIGatewayProxyR
     .handler(async (request: APIGatewayProxyEvent, context: any) => {
         const landmarkId = request.pathParameters?.ID!;
 
-        const response = await ddbClient.retrieveLatest(landmarkId);
-        const result = response.Items?.[0];
+        const result = await ddbClient.get(landmarkId, '*');
 
-        if (!result) {
+        if (!result?.Item) {
             return {
                 statusCode: 404,
                 isBase64Encoded: false,
@@ -54,7 +61,7 @@ export const getLandmark: Handler = middy<APIGatewayProxyEvent, APIGatewayProxyR
                 }),
             };
         } else {
-            const landmark = new Landmark(result as LandmarkOpts);
+            const landmark = new Landmark(result.Item as unknown as LandmarkOpts);
 
             return {
                 statusCode: 200,
@@ -75,7 +82,15 @@ const patchLandmarkRequestSchema = transpileSchema({
 
 export const patchLandmark: Handler = middy<APIGatewayProxyEvent, APIGatewayProxyResult>()
     .use(httpHeaderNormalizer())
-    .use(cors({ origin: '*', methods: 'GET,PATCH', headers: allowedHeaders.join(',') }))
+    .use(
+        cors({
+            methods: 'GET,PATCH',
+            headers: allowedHeaders.join(','),
+            getOrigin: (incomingOrigin, options) => {
+                return incomingOrigin;
+            },
+        }),
+    )
     .use(jsonBodyParser())
     .use(validator({ eventSchema: patchLandmarkRequestSchema }))
     .use(validatorErrorHandler())
@@ -83,10 +98,9 @@ export const patchLandmark: Handler = middy<APIGatewayProxyEvent, APIGatewayProx
     .handler(async (request: APIGatewayProxyEvent, context: any) => {
         const landmarkId = request.pathParameters?.ID!;
 
-        const response = await ddbClient.retrieveLatest(landmarkId);
-        const item = response.Items?.[0];
+        const result = await ddbClient.get(landmarkId, '*');
 
-        if (!item) {
+        if (!result?.Item) {
             return {
                 statusCode: 404,
                 isBase64Encoded: false,
@@ -96,15 +110,45 @@ export const patchLandmark: Handler = middy<APIGatewayProxyEvent, APIGatewayProx
             };
         }
 
-        const landmark = new Landmark(item as LandmarkOpts);
-        Object.assign(landmark, request.body, { Version: Date.now() });
+        const landmark = new Landmark(result.Item as LandmarkOpts);
+        landmark.update(request.body as any);
 
-        const putResult = await ddbClient.put(landmark.toDynamoDBDocument());
+        const writeResult = await ddbClient.batchWrite([landmark.toDynamoDBDocument(), landmark.getPropertyChanges()]);
 
         return {
             statusCode: 200,
             isBase64Encoded: false,
             body: JSON.stringify(landmark.toJson()),
+        };
+    });
+
+export const listLandmarks: Handler = middy<APIGatewayProxyEvent, APIGatewayProxyResult>()
+    .use(httpHeaderNormalizer())
+    .use(
+        cors({
+            methods: 'GET,POST',
+            headers: allowedHeaders.join(','),
+            getOrigin: (incomingOrigin, options) => {
+                return incomingOrigin;
+            },
+        }),
+    )
+    .use(httpErrorHandler())
+    .handler(async (request: APIGatewayProxyEvent, context: any) => {
+        const resultSet = await ddbClient.scan('#ver = :ver', { ':ver': '*' }, { '#ver': 'ver' });
+
+        return {
+            statusCode: 200,
+            isBase64Encoded: false,
+            headers: {
+                'Content-Type': 'application/geo+json',
+            },
+            body: JSON.stringify({
+                Works: resultSet.Items?.map((record) => {
+                    const work = new Landmark(record as LandmarkOpts);
+                    return work.toJson();
+                }),
+            }),
         };
     });
 
@@ -118,20 +162,31 @@ const postLandmarkRequestSchema = transpileSchema({
 
 export const postLandmark: Handler = middy<APIGatewayProxyEvent, APIGatewayProxyResult>()
     .use(httpHeaderNormalizer())
-    .use(cors({ origin: '*', methods: 'POST', headers: allowedHeaders.join(',') }))
+    .use(
+        cors({
+            methods: 'GET,POST',
+            headers: allowedHeaders.join(','),
+            getOrigin: (incomingOrigin, options) => {
+                return incomingOrigin;
+            },
+        }),
+    )
     .use(jsonBodyParser())
     .use(validator({ eventSchema: postLandmarkRequestSchema }))
     .use(validatorErrorHandler())
     .use(httpErrorHandler())
     .handler(async (request: APIGatewayProxyEvent, context: any) => {
         const landmarkOpts = request.body as any as LandmarkOpts;
-        const item = new Landmark(landmarkOpts);
+        const landmark = new Landmark(landmarkOpts);
+        const item = landmark.toDynamoDBDocument();
 
-        const result = await ddbClient.put(item.toDynamoDBDocument());
+        // The current record has '*' as the range key.
+        const latest = Object.assign({}, item, { ver: '*' });
+        const batchResult = await ddbClient.batchWrite([item, latest]);
 
         return {
             statusCode: 200,
             isBase64Encoded: false,
-            body: JSON.stringify(item.toJson()),
+            body: JSON.stringify(landmark.toJson()),
         };
     });

@@ -8,6 +8,7 @@ module "get-upload-url-handler" {
 
   environment_variables = {
     NODE_ENV                = "prod"
+    NODE_OPTIONS            = "--enable-source-maps"
     S3_BUCKET_ASSET_UPLOADS = module.client_photos.bucket_name
   }
 
