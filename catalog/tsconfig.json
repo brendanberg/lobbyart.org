@@ -13,6 +13,7 @@
     "sourceMap": true,
     "resolveJsonModule": true,
     "declarationMap": true,
+    "lib": ["es2025"],
     "paths": {
       "@*": ["./src/*"]
     },

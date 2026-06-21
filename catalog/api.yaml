@@ -47,7 +47,7 @@ paths:
             statusCode: '200'
             responseParameters:
               'method.response.header.Access-Control-Allow-Origin': 'context.requestOverride.header.Access-Control-Allow-Origin'
-              'method.response.header.Access-Control-Allow-Methods': "'GET,PATCH,OPTIONS'"
+              'method.response.header.Access-Control-Allow-Methods': "'GET'"
               'method.response.header.Access-Control-Allow-Headers': "'Accept,Authorization,Content-Type,Origin,x-amz-date,x-apigateway-header'"
     get:
       responses:
@@ -106,7 +106,7 @@ paths:
             statusCode: '200'
             responseParameters:
               'method.response.header.Access-Control-Allow-Origin': 'context.requestOverride.header.Access-Control-Allow-Origin'
-              'method.response.header.Access-Control-Allow-Methods': "'GET,PATCH,OPTIONS'"
+              'method.response.header.Access-Control-Allow-Methods': "'GET,POST,OPTIONS'"
               'method.response.header.Access-Control-Allow-Headers': "'Accept,Authorization,Content-Type,Origin,x-amz-date,x-apigateway-header'"
     post:
       responses:
@@ -126,6 +126,24 @@ paths:
         timeoutInMillis: 15000
         connectionType: INTERNET
         uri: ${post_work_handler}
+    get:
+      responses:
+        '200':
+          description: Created
+        '401':
+          description: Unauthorized
+      x-amazon-apigateway-auth:
+        type: NONE
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        responses:
+          default:
+            statusCode: '200'
+        passthroughBehavior: when_no_match
+        timeoutInMillis: 15000
+        connectionType: INTERNET
+        uri: ${list_works_handler}
   /works/{ID}:
     options:
       parameters:
@@ -211,3 +229,62 @@ paths:
         timeoutInMillis: 15000
         connectionType: INTERNET
         uri: ${patch_work_handler}
+  /works.geojson:
+    options:
+      parameters:
+        - name: 'Origin'
+          in: 'header'
+          schema:
+            type: 'string'
+      responses:
+        '200':
+          description: Success
+          headers:
+            Access-Control-Allow-Origin:
+              schema:
+                type: 'string'
+            Access-Control-Allow-Methods:
+              schema:
+                type: 'string'
+            Access-Control-Allow-Headers:
+              schema:
+                type: 'string'
+          content: {}
+      x-amazon-apigateway-auth:
+        type: NONE
+      x-amazon-apigateway-integration:
+        type: mock
+        httpMethod: 'GET'
+        connectionType: 'INTERNET'
+        contentHandling: 'CONVERT_TO_TEXT'
+        passthroughBehavior: when_no_templates
+        timeoutInMillis: 4000
+        requestTemplates:
+          application/json: |
+            { "statusCode": 200 }
+            #set($context.requestOverride.header.Access-Control-Allow-Origin = $input.params('Origin'))
+        requestParameters:
+          'integration.request.header.Origin': 'method.request.header.Origin'
+        responses:
+          '200':
+            statusCode: '200'
+            responseParameters:
+              'method.response.header.Access-Control-Allow-Origin': 'context.requestOverride.header.Access-Control-Allow-Origin'
+              'method.response.header.Access-Control-Allow-Methods': "'GET,OPTIONS'"
+              'method.response.header.Access-Control-Allow-Headers': "'Accept,Authorization,Content-Type,Origin,x-amz-date,x-apigateway-header'"
+    get:
+      responses:
+        '200':
+          description: Success
+      x-amazon-apigateway-auth:
+        type: NONE
+      x-amazon-apigateway-integration:
+        type: aws_proxy
+        httpMethod: POST
+        responses:
+          default:
+            statusCode: '200'
+        passthroughBehavior: when_no_match
+        timeoutInMillis: 15000
+        connectionType: INTERNET
+        uri: ${list_works_geojson_handler}

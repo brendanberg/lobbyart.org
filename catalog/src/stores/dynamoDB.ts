@@ -30,31 +30,37 @@ export class DynamoDB {
         });
     }
 
-    async retrieveLatest(hash_value: string) {
-        return await this.client.query({
-            TableName: this.table_name,
-            KeyConditionExpression: '#hash = :hkey',
-            ExpressionAttributeValues: {
-                ':hkey': hash_value,
+    async batchWrite(putItems: JsonObject[], deleteItems: JsonObject[] = []) {
+        return await this.client.batchWrite({
+            RequestItems: {
+                [this.table_name]: putItems
+                    .map((item) => ({ PutRequest: { Item: item } }) as any)
+                    .concat(deleteItems.map((item) => ({ DeleteRequest: { Item: item } }) as any)),
             },
-            ExpressionAttributeNames: {
-                '#hash': this.hash_key,
-            },
-            ScanIndexForward: false,
-            Limit: 1,
         });
     }
 
-    async query(key: string) {
+    async query(
+        keyConditionExpr: string,
+        filterExpr: string,
+        attributeValues: { [key: string]: any },
+        attributeNames: { [key: string]: string },
+    ) {
         return await this.client.query({
             TableName: this.table_name,
-            KeyConditionExpression: '#hash = :hkey',
-            ExpressionAttributeValues: {
-                ':hkey': key,
-            },
-            ExpressionAttributeNames: {
-                '#hash': this.hash_key,
-            },
+            KeyConditionExpression: keyConditionExpr,
+            FilterExpression: filterExpr,
+            ExpressionAttributeValues: attributeValues,
+            ExpressionAttributeNames: attributeNames,
+        });
+    }
+
+    async scan(filterExpr: string, attributeValues: { [key: string]: any }, attributeNames: { [key: string]: string }) {
+        return await this.client.scan({
+            TableName: this.table_name,
+            FilterExpression: filterExpr,
+            ExpressionAttributeValues: attributeValues,
+            ExpressionAttributeNames: attributeNames,
         });
     }
 
@@ -62,6 +68,29 @@ export class DynamoDB {
         return await this.client.put({
             TableName: this.table_name,
             Item: item,
+        });
+    }
+
+    async update(item: JsonObject) {
+        const { [this.hash_key]: hash_value, [this.range_key]: range_value, ...updates } = item;
+        const updateEntries = Object.entries(updates);
+
+        // const updateExpression =
+        return await this.client.update({
+            TableName: this.table_name,
+            Key: {
+                [this.hash_key]: hash_value,
+                [this.range_key]: range_value,
+            },
+            UpdateExpression: 'set ' + updateEntries.map(([k, v]) => `#${k} = :${k}`).join(', '),
+            ExpressionAttributeNames: updateEntries.reduce((d, [k, v]) => {
+                Object.assign(d, { [`#${k}`]: k });
+                return d;
+            }, {}),
+            ExpressionAttributeValues: updateEntries.reduce((d, [k, v]) => {
+                Object.assign(d, { [`:${k}`]: v });
+                return d;
+            }, {}),
         });
     }
 }
